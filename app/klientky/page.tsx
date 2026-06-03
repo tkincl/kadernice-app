@@ -79,6 +79,96 @@ function TelefonInput({ value, onChange, autoFocus }: {
           V pořádku
         </p>
       )}
+      {/* Modal import kontaktu */}
+      {showImport && (
+        <div className="fixed inset-0 bg-black/40 z-[60] flex items-end max-w-md mx-auto">
+          <div className="bg-white rounded-t-2xl w-full flex flex-col" style={{maxHeight: "calc(100dvh - 64px)"}}>
+            <div className="flex-shrink-0 px-5 pt-5 pb-3 border-b border-gray-100">
+              <div className="w-9 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-semibold text-gray-900">Import klientek</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {importKontakty.length > 0
+                      ? `${importKontakty.filter(k=>k.vybrana).length} vybraných z ${importKontakty.length}`
+                      : "Přidej klientky ručně nebo povol přístup ke kontaktům"}
+                  </p>
+                </div>
+                {importKontakty.length > 0 && (
+                  <button onClick={() => {
+                    setImportKontakty(prev => prev.map(k => ({...k, vybrana: !prev.every(x=>x.vybrana)})))
+                  }} className="text-xs text-emerald-600 font-medium px-3 py-1.5 bg-emerald-50 rounded-lg">
+                    {importKontakty.every(k=>k.vybrana) ? "Odznačit vše" : "Vybrat vše"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto min-h-0">
+              {importKontakty.length === 0 ? (
+                <div className="px-5 py-6">
+                  <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+                    Kontakty API není dostupné v tomto prohlížeči. Přidej klientky ručně – každou na nový řádek ve formátu:
+                  </p>
+                  <p className="text-xs font-mono bg-gray-50 rounded-xl p-3 text-gray-500 mb-4">
+                    Jana Nováková, 777 123 456<br/>
+                    Blanka Tichá, 603 456 789<br/>
+                    Monika Rezková
+                  </p>
+                  <textarea
+                    placeholder="Jana Nováková, 777 123 456&#10;Blanka Tichá, 603 456 789"
+                    rows={6}
+                    onChange={(e) => {
+                      const radky = e.target.value.split("
+").filter(r => r.trim())
+                      const kontakty = radky.map(r => {
+                        const casti = r.split(",").map(s => s.trim())
+                        return {
+                          jmeno: casti[0] ?? "",
+                          telefon: casti[1] ? formatTelefon(casti[1].replace(/[^0-9]/g, "")) : "",
+                          vybrana: true
+                        }
+                      }).filter(k => k.jmeno)
+                      setImportKontakty(kontakty)
+                    }}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-emerald-300 resize-none"
+                  />
+                </div>
+              ) : (
+                importKontakty.map((k, i) => (
+                  <button key={i}
+                    onClick={() => setImportKontakty(prev => prev.map((x, j) => j === i ? {...x, vybrana: !x.vybrana} : x))}
+                    className={`w-full flex items-center gap-3 px-5 py-3.5 border-b border-gray-50 text-left transition-colors ${k.vybrana ? "bg-emerald-50" : "bg-white"}`}>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${k.vybrana ? "bg-emerald-500 border-emerald-500" : "border-gray-200"}`}>
+                      {k.vybrana && <svg width="12" height="12" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{k.jmeno}</p>
+                      {k.telefon && <p className="text-xs text-gray-400">{k.telefon}</p>}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+
+            <div className="flex-shrink-0 px-5 py-4 border-t border-gray-100 flex gap-2">
+              <button onClick={() => { setShowImport(false); setImportKontakty([]) }}
+                className="flex-1 bg-gray-50 border border-gray-100 text-gray-600 rounded-xl py-3 text-sm font-medium">
+                Zrušit
+              </button>
+              <button onClick={handleUlozitImport}
+                disabled={importuji || importKontakty.filter(k=>k.vybrana).length === 0}
+                className="flex-1 bg-emerald-500 text-white rounded-xl py-3 text-sm font-semibold disabled:opacity-40 flex items-center justify-center gap-2">
+                {importuji ? (
+                  <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/>Ukládám...</>
+                ) : (
+                  `Přidat ${importKontakty.filter(k=>k.vybrana).length} klientek`
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -90,6 +180,9 @@ export default function KlientkyPage() {
   const [showNova, setShowNova] = useState(false)
   const [noveJmeno, setNoveJmeno] = useState("")
   const [noveTelefon, setNoveTelefon] = useState("")
+  const [showImport, setShowImport] = useState(false)
+  const [importKontakty, setImportKontakty] = useState<{jmeno: string, telefon: string, vybrana: boolean}[]>([])
+  const [importuji, setImportuji] = useState(false)
 
   const filtrovane = klientky.filter(
     (k) => k.jmeno.toLowerCase().includes(hledani.toLowerCase()) || k.telefon.includes(hledani)
@@ -108,6 +201,46 @@ export default function KlientkyPage() {
     setNoveJmeno("")
     setNoveTelefon("")
     router.push('/klientky')
+  }
+
+  const handleImportKontaktu = async () => {
+    // Contacts API - funguje na Android Chrome a iOS Safari
+    if (!("contacts" in navigator && "ContactsManager" in window)) {
+      // Fallback - manualni zadani vice klientek
+      setShowImport(true)
+      return
+    }
+    try {
+      const contacts = await (navigator as any).contacts.select(
+        ["name", "tel"],
+        { multiple: true }
+      )
+      const zpracovane = contacts
+        .filter((c: any) => c.name?.[0] && c.tel?.[0])
+        .map((c: any) => ({
+          jmeno: c.name[0],
+          telefon: formatTelefon(c.tel[0].replace(/\s/g, "").replace(/^\+420/, "")),
+          vybrana: true,
+        }))
+      if (zpracovane.length === 0) return
+      setImportKontakty(zpracovane)
+      setShowImport(true)
+    } catch (e) {
+      // Uzivatel zrusil nebo API neni dostupne
+      setShowImport(true)
+    }
+  }
+
+  const handleUlozitImport = async () => {
+    const vybrane = importKontakty.filter(k => k.vybrana)
+    if (vybrane.length === 0) return
+    setImportuji(true)
+    for (const k of vybrane) {
+      await pridatKlientku({ jmeno: k.jmeno, telefon: k.telefon, fotkyVlasu: [] })
+    }
+    setImportuji(false)
+    setShowImport(false)
+    setImportKontakty([])
   }
 
   return (
@@ -158,15 +291,26 @@ export default function KlientkyPage() {
         })}
       </div>
 
-      <div className="flex-shrink-0 px-4 py-3 border-t border-gray-100 bg-white">
+      <div className="flex-shrink-0 px-4 py-3 border-t border-gray-100 bg-white flex gap-2">
         <button
           onClick={() => setShowNova(true)}
-          className="w-full bg-emerald-500 text-white rounded-xl py-3.5 text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          className="flex-1 bg-emerald-500 text-white rounded-xl py-3.5 text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
         >
           <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M12 5v14M5 12h14" />
           </svg>
-          Přidat klientku
+          Přidat
+        </button>
+        <button
+          onClick={handleImportKontaktu}
+          className="flex-1 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl py-3.5 text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+        >
+          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Z kontaktů
         </button>
       </div>
 
@@ -191,6 +335,96 @@ export default function KlientkyPage() {
             <div className="flex gap-2">
               <button onClick={() => setShowNova(false)} className="flex-1 bg-gray-50 border border-gray-100 text-gray-600 rounded-xl py-3 text-sm font-medium">Zrušit</button>
               <button onClick={handlePridat} disabled={!noveJmeno.trim()} className="flex-1 bg-emerald-500 text-white rounded-xl py-3 text-sm font-medium disabled:opacity-40">Vytvořit</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal import kontaktu */}
+      {showImport && (
+        <div className="fixed inset-0 bg-black/40 z-[60] flex items-end max-w-md mx-auto">
+          <div className="bg-white rounded-t-2xl w-full flex flex-col" style={{maxHeight: "calc(100dvh - 64px)"}}>
+            <div className="flex-shrink-0 px-5 pt-5 pb-3 border-b border-gray-100">
+              <div className="w-9 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-semibold text-gray-900">Import klientek</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {importKontakty.length > 0
+                      ? `${importKontakty.filter(k=>k.vybrana).length} vybraných z ${importKontakty.length}`
+                      : "Přidej klientky ručně nebo povol přístup ke kontaktům"}
+                  </p>
+                </div>
+                {importKontakty.length > 0 && (
+                  <button onClick={() => {
+                    setImportKontakty(prev => prev.map(k => ({...k, vybrana: !prev.every(x=>x.vybrana)})))
+                  }} className="text-xs text-emerald-600 font-medium px-3 py-1.5 bg-emerald-50 rounded-lg">
+                    {importKontakty.every(k=>k.vybrana) ? "Odznačit vše" : "Vybrat vše"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto min-h-0">
+              {importKontakty.length === 0 ? (
+                <div className="px-5 py-6">
+                  <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+                    Kontakty API není dostupné v tomto prohlížeči. Přidej klientky ručně – každou na nový řádek ve formátu:
+                  </p>
+                  <p className="text-xs font-mono bg-gray-50 rounded-xl p-3 text-gray-500 mb-4">
+                    Jana Nováková, 777 123 456<br/>
+                    Blanka Tichá, 603 456 789<br/>
+                    Monika Rezková
+                  </p>
+                  <textarea
+                    placeholder="Jana Nováková, 777 123 456&#10;Blanka Tichá, 603 456 789"
+                    rows={6}
+                    onChange={(e) => {
+                      const radky = e.target.value.split("
+").filter(r => r.trim())
+                      const kontakty = radky.map(r => {
+                        const casti = r.split(",").map(s => s.trim())
+                        return {
+                          jmeno: casti[0] ?? "",
+                          telefon: casti[1] ? formatTelefon(casti[1].replace(/[^0-9]/g, "")) : "",
+                          vybrana: true
+                        }
+                      }).filter(k => k.jmeno)
+                      setImportKontakty(kontakty)
+                    }}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-emerald-300 resize-none"
+                  />
+                </div>
+              ) : (
+                importKontakty.map((k, i) => (
+                  <button key={i}
+                    onClick={() => setImportKontakty(prev => prev.map((x, j) => j === i ? {...x, vybrana: !x.vybrana} : x))}
+                    className={`w-full flex items-center gap-3 px-5 py-3.5 border-b border-gray-50 text-left transition-colors ${k.vybrana ? "bg-emerald-50" : "bg-white"}`}>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${k.vybrana ? "bg-emerald-500 border-emerald-500" : "border-gray-200"}`}>
+                      {k.vybrana && <svg width="12" height="12" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{k.jmeno}</p>
+                      {k.telefon && <p className="text-xs text-gray-400">{k.telefon}</p>}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+
+            <div className="flex-shrink-0 px-5 py-4 border-t border-gray-100 flex gap-2">
+              <button onClick={() => { setShowImport(false); setImportKontakty([]) }}
+                className="flex-1 bg-gray-50 border border-gray-100 text-gray-600 rounded-xl py-3 text-sm font-medium">
+                Zrušit
+              </button>
+              <button onClick={handleUlozitImport}
+                disabled={importuji || importKontakty.filter(k=>k.vybrana).length === 0}
+                className="flex-1 bg-emerald-500 text-white rounded-xl py-3 text-sm font-semibold disabled:opacity-40 flex items-center justify-center gap-2">
+                {importuji ? (
+                  <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/>Ukládám...</>
+                ) : (
+                  `Přidat ${importKontakty.filter(k=>k.vybrana).length} klientek`
+                )}
+              </button>
             </div>
           </div>
         </div>
