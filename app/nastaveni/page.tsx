@@ -15,10 +15,7 @@ export default function NastaveniPage() {
 
   const handleVytvorit = async () => {
     if (!showVytvorit) return
-    const poptavka = poptavky.find((p) => p.id === showVytvorit)
-    if (!poptavka) return
-    await pridatKlientku({ jmeno: poptavka.jmeno, telefon: poptavka.telefon, fotkyVlasu: [] })
-    await vyriditPoptavku(showVytvorit)
+    await vytvorKlientkuZPoptavky(showVytvorit)
     setShowVytvorit(null)
     setShowPoptavky(false)
     router.push("/kalendar")
