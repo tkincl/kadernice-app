@@ -91,6 +91,32 @@ export default function KartaKlientky() {
   const [nahravani, setNahravani] = useState<"vlasy" | "recept" | null>(null)
   const [aktivniRezervaceProFoto, setAktivniRezervaceProFoto] = useState<string | null>(null)
 
+  const komprimovatFotku = (file: File, maxSize: number = 1200, kvalita: number = 0.8): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      const url = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        const canvas = document.createElement("canvas")
+        let { width, height } = img
+        // Zmensime pokud je vetsi nez maxSize
+        if (width > height && width > maxSize) {
+          height = Math.round(height * maxSize / width)
+          width = maxSize
+        } else if (height > maxSize) {
+          width = Math.round(width * maxSize / height)
+          height = maxSize
+        }
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext("2d")!
+        ctx.drawImage(img, 0, 0, width, height)
+        canvas.toBlob((blob) => resolve(blob!), "image/jpeg", kvalita)
+      }
+      img.src = url
+    })
+  }
+
   const handleFoto = async (typ: "vlasy" | "recept", rezervaceId: string) => {
     const input = document.createElement("input")
     input.type = "file"
@@ -101,8 +127,13 @@ export default function KartaKlientky() {
       if (!file) return
       setNahravani(typ)
       try {
+        // Komprimujeme pred uploadem - max 1200px, 80% kvalita
+        const komprimovano = await komprimovatFotku(file)
         const nazev = `${id}/${rezervaceId}_${typ}_${Date.now()}.jpg`
-        const { error } = await supabase.storage.from("fotky").upload(nazev, file, { upsert: true })
+        const { error } = await supabase.storage.from("fotky").upload(nazev, komprimovano, {
+          upsert: true,
+          contentType: "image/jpeg"
+        })
         if (error) throw error
         const { data } = supabase.storage.from("fotky").getPublicUrl(nazev)
         if (typ === "vlasy") {
