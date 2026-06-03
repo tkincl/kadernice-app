@@ -3,11 +3,9 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAppStore } from "@/store/useAppStore"
-import { Sluzba } from "@/types"
-
 export default function NastaveniPage() {
   const router = useRouter()
-  const { poptavky, odmitnoutPoptavku, pridatKlientku, vyriditPoptavku } = useAppStore()
+  const { poptavky, odmitnoutPoptavku, vytvorKlientkuZPoptavky } = useAppStore()
   const [showPoptavky, setShowPoptavky] = useState(false)
   const [showVytvorit, setShowVytvorit] = useState<string | null>(null)
 
