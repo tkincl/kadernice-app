@@ -107,7 +107,7 @@ export default function KlientkyPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col" style={{height: "calc(100vh - 80px)"}}>
       <div className="flex-shrink-0 px-4 pt-5 pb-3 border-b border-gray-100">
         <h1 className="text-xl font-medium text-gray-900 mb-3">Klientky</h1>
         <div className="flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5">

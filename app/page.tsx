@@ -38,7 +38,7 @@ export default function PrehledDne() {
   const datumText = `${DNY_CZ[dnes.getDay()]}, ${dnes.getDate()}. ${MESICE_CZ[dnes.getMonth()]}`
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col" style={{height: "calc(100vh - 80px)"}}>
       <div className="flex-shrink-0 px-4 pt-5 pb-3 border-b border-gray-100">
         <div className="flex items-center justify-between mb-3">
           <div>
