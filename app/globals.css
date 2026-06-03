@@ -5,6 +5,11 @@
 @layer base {
   html {
     font-size: 17px;
+    /* Zabrání posunu při scrollu na iOS */
+    height: -webkit-fill-available;
+  }
+  body {
+    min-height: -webkit-fill-available;
   }
 }
 

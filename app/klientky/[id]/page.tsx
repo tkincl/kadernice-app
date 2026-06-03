@@ -170,7 +170,7 @@ export default function KartaKlientky() {
   }
 
   return (
-    <div className="flex flex-col" style={{height: "calc(100vh - 80px)"}}>
+    <div className="flex flex-col" style={{height: "calc(100dvh - 80px)"}}>
       {/* Header */}
       <div className="flex-shrink-0 px-4 pt-4 pb-3 border-b border-gray-100">
         <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-gray-400 mb-3">

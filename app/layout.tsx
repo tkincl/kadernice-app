@@ -9,6 +9,11 @@ const geist = Geist({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Kadeřnice",
   description: "Aplikace pro kadeřnice",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Kadeřnice",
+  },
 }
 
 export const viewport: Viewport = {
@@ -17,6 +22,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   themeColor: "#ffffff",
+  viewportFit: "cover",
 }
 
 export default function RootLayout({
@@ -27,9 +33,9 @@ export default function RootLayout({
   return (
     <html lang="cs">
       <body className={`${geist.className} bg-gray-50`}>
-        <div className="max-w-md mx-auto min-h-screen bg-white relative">
+        <div className="max-w-md mx-auto bg-white relative" style={{minHeight: "100dvh"}}>
           <DataProvider>
-            <main className="pb-24">{children}</main>
+            <main style={{paddingBottom: "80px"}}>{children}</main>
             <BottomNav />
           </DataProvider>
         </div>

@@ -245,7 +245,7 @@ function KalendarContent() {
   const editRezervace = editRezervaceId ? rezervaceDnes.find((x) => x.id === editRezervaceId) : null
 
   return (
-    <div className="flex flex-col" style={{height: "calc(100vh - 80px)"}}>
+    <div className="flex flex-col" style={{height: "calc(100dvh - 80px)"}}>
       <div className="flex-shrink-0 px-4 pt-4 pb-2 border-b border-gray-100">
         <div className="flex items-center justify-between mb-2">
           <button onClick={() => setTydneOffset(tydneOffset - 1)}
