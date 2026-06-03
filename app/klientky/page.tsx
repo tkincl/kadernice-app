@@ -294,8 +294,7 @@ export default function KlientkyPage() {
                     placeholder="Jana Novakova | Blanka Ticha"
                     rows={6}
                     onChange={(e) => {
-                      const radky = e.target.value.split("
-").filter((r: string) => r.trim())
+                      const radky = e.target.value.split("\n").filter((r: string) => r.trim())
                       const kontakty = radky.map((r: string) => {
                         const casti = r.split(",").map((s: string) => s.trim())
                         return {
