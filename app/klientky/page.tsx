@@ -288,12 +288,10 @@ export default function KlientkyPage() {
                     Zadej klientky rucne – kazda na novy radek ve formatu: Jmeno, telefon
                   </p>
                   <p className="text-xs font-mono bg-gray-50 rounded-xl p-3 text-gray-400 mb-3">
-                    Jana Novakova, 777 123 456{"
-"}Blanka Ticha, 603 456 789
+                    Jana Novakova, 777 123 456 | Blanka Ticha, 603 456 789
                   </p>
                   <textarea
-                    placeholder={"Jana Novakova, 777 123 456
-Blanka Ticha, 603 456 789"}
+                    placeholder="Jana Novakova | Blanka Ticha"
                     rows={6}
                     onChange={(e) => {
                       const radky = e.target.value.split("
