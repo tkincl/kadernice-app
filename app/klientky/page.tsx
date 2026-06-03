@@ -21,19 +21,19 @@ function getBarvu(id: string) {
 }
 
 
-function validateTelefon(tel: string): string | null {
-  const cislice = tel.replace(/[^0-9]/g, "")
-  if (cislice.length === 0) return null
-  if (cislice.length < 9) return "Telefonní číslo musí mít 9 číslic"
-  if (cislice.length > 9) return "Telefonní číslo musí mít 9 číslic"
-  return null
-}
-
 function formatTelefon(val: string): string {
+  // Vzdy jen cislice, max 9
   const cislice = val.replace(/[^0-9]/g, "").slice(0, 9)
   if (cislice.length <= 3) return cislice
   if (cislice.length <= 6) return cislice.slice(0,3) + " " + cislice.slice(3)
   return cislice.slice(0,3) + " " + cislice.slice(3,6) + " " + cislice.slice(6)
+}
+
+function validateTelefon(tel: string): string | null {
+  const cislice = tel.replace(/[^0-9]/g, "")
+  if (cislice.length === 0) return null
+  if (cislice.length < 9) return `Zbývá ${9 - cislice.length} číslic`
+  return null
 }
 
 function TelefonInput({ value, onChange, autoFocus }: {
@@ -41,37 +41,41 @@ function TelefonInput({ value, onChange, autoFocus }: {
   onChange: (val: string) => void
   autoFocus?: boolean
 }) {
+  const cislice = value.replace(/[^0-9]/g, "")
   const chyba = validateTelefon(value)
-  const jeVyplnene = value.replace(/[^0-9]/g, "").length > 0
+  const jeVyplnene = cislice.length > 0
+  const jeHotove = cislice.length === 9
+
   return (
     <div>
-      <input
-        type="tel"
-        placeholder="777 123 456"
-        value={value}
-        autoFocus={autoFocus}
-        onChange={(e) => onChange(formatTelefon(e.target.value))}
-        className={`w-full border rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none transition-colors ${
-          jeVyplnene && chyba
-            ? "border-red-300 bg-red-50 focus:border-red-400"
-            : jeVyplnene && !chyba
-            ? "border-emerald-200 bg-emerald-50 focus:border-emerald-300"
-            : "bg-gray-50 border-gray-100 focus:border-emerald-300"
-        }`}
-      />
-      {jeVyplnene && chyba && (
-        <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-          <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
-          </svg>
-          {chyba}
-        </p>
+      <div className="relative">
+        <input
+          type="tel"
+          inputMode="numeric"
+          placeholder="777 123 456"
+          value={value}
+          autoFocus={autoFocus}
+          onChange={(e) => onChange(formatTelefon(e.target.value))}
+          className={`w-full border rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none transition-colors pr-16 ${
+            jeHotove
+              ? "border-emerald-300 bg-emerald-50"
+              : jeVyplnene
+              ? "border-orange-300 bg-orange-50"
+              : "bg-gray-50 border-gray-100 focus:border-emerald-300"
+          }`}
+        />
+        <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium tabular-nums ${
+          jeHotove ? "text-emerald-500" : "text-orange-400"
+        }`}>
+          {cislice.length}/9
+        </span>
+      </div>
+      {jeVyplnene && !jeHotove && (
+        <p className="text-xs text-orange-500 mt-1">{chyba}</p>
       )}
-      {jeVyplnene && !chyba && (
+      {jeHotove && (
         <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
-          <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M20 6 9 17l-5-5"/>
-          </svg>
+          <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
           V pořádku
         </p>
       )}
