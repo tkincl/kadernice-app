@@ -79,7 +79,10 @@ function TelefonInput({ value, onChange, autoFocus }: {
           V pořádku
         </p>
       )}
-      
+    </div>
+  )
+}
+
 export default function KlientkyPage() {
   const router = useRouter()
   const { klientky, pridatKlientku } = useAppStore()
