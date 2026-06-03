@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className={`${geist.className} bg-gray-50`}>
         <div className="max-w-md mx-auto min-h-screen bg-white relative">
           <DataProvider>
-            <main className="pb-20">{children}</main>
+            <main className="pb-24">{children}</main>
             <BottomNav />
           </DataProvider>
         </div>
