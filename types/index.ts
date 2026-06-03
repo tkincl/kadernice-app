@@ -50,4 +50,6 @@ export interface Rezervace {
   cena?: number
   zaplaceno: boolean
   stav: "ceka" | "probiha" | "hotovo"
+  fotoVlasu?: string
+  fotoReceptu?: string
 }
