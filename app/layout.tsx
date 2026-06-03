@@ -4,7 +4,7 @@ import "./globals.css"
 import BottomNav from "@/components/BottomNav"
 import DataProvider from "@/components/DataProvider"
 
-const geist = Geist({ subsets: ["latin"] })
+const geist = Geist({ subsets: ["latin"], display: "swap", preload: true })
 
 export const metadata: Metadata = {
   title: "Kadeřnice",
@@ -30,6 +30,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="cs">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className={`${geist.className} bg-gray-50`}>
         <div className="max-w-md mx-auto bg-white relative" style={{minHeight: "100dvh"}}>
           <DataProvider>
