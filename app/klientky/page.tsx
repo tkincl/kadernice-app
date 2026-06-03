@@ -185,10 +185,7 @@ export default function KlientkyPage() {
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1">Telefon</label>
-                <input type="tel" placeholder="777 123 456" value={noveTelefon}
-                  maxLength={13}
-                  onChange={(e) => setNoveTelefon(e.target.value.replace(/[^0-9 ]/g, "").slice(0, 13))}
-                  className="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-emerald-300" />
+                <TelefonInput value={noveTelefon} onChange={setNoveTelefon} />
               </div>
             </div>
             <div className="flex gap-2">
