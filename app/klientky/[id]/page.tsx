@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { useAppStore } from "@/store/useAppStore"
+import { supabase } from "@/lib/supabase"
 
 function getInitials(jmeno: string) {
   return jmeno.split(" ").map((s) => s[0]).join("").toUpperCase().slice(0, 2)
@@ -83,6 +84,37 @@ export default function KartaKlientky() {
   const [editPoznamka, setEditPoznamka] = useState("")
   const [showSmazat, setShowSmazat] = useState(false)
   const [zobrazenaFotka, setZobrazenaFotka] = useState<string | null>(null)
+  const [nahravani, setNahravani] = useState<"vlasy" | "recept" | null>(null)
+  const [aktivniRezervaceProFoto, setAktivniRezervaceProFoto] = useState<string | null>(null)
+
+  const handleFoto = async (typ: "vlasy" | "recept", rezervaceId: string) => {
+    const input = document.createElement("input")
+    input.type = "file"
+    input.accept = "image/*"
+    input.capture = "environment"
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+      setNahravani(typ)
+      try {
+        const nazev = `${id}/${rezervaceId}_${typ}_${Date.now()}.jpg`
+        const { error } = await supabase.storage.from("fotky").upload(nazev, file, { upsert: true })
+        if (error) throw error
+        const { data } = supabase.storage.from("fotky").getPublicUrl(nazev)
+        if (typ === "vlasy") {
+          await upravitRezervaci(rezervaceId, { fotoVlasu: data.publicUrl })
+        } else {
+          await upravitRezervaci(rezervaceId, { fotoReceptu: data.publicUrl })
+        }
+      } catch (err) {
+        console.error("Chyba nahrávání:", err)
+        alert("Nepodařilo se nahrát fotku. Zkuste to znovu.")
+      } finally {
+        setNahravani(null)
+      }
+    }
+    input.click()
+  }
 
   if (!klientka) {
     return (
@@ -172,25 +204,63 @@ export default function KartaKlientky() {
 
       {/* Akce */}
       <div className="flex-shrink-0 px-4 py-3 border-b border-gray-100">
-        <div className="grid grid-cols-2 gap-2 mb-2">
-          <button className="bg-blue-50 border border-blue-100 rounded-xl py-3.5 flex flex-col items-center gap-1.5 active:scale-[0.97] transition-transform">
-            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
-              <svg width="18" height="18" fill="none" stroke="#1d4ed8" strokeWidth="1.5" viewBox="0 0 24 24">
-                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
-                <circle cx="12" cy="13" r="3"/>
-              </svg>
+        {/* Vyber rezervace pro foto */}
+        {aktivniRezervace && (
+          <div className="grid grid-cols-2 gap-2 mb-2">
+            <button
+              onClick={() => handleFoto("vlasy", aktivniRezervace.id)}
+              disabled={nahravani !== null}
+              className="bg-blue-50 border border-blue-100 rounded-xl py-3.5 flex flex-col items-center gap-1.5 active:scale-[0.97] transition-transform disabled:opacity-50">
+              <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+                {nahravani === "vlasy" ? (
+                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"/>
+                ) : (
+                  <svg width="18" height="18" fill="none" stroke="#1d4ed8" strokeWidth="1.5" viewBox="0 0 24 24">
+                    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                    <circle cx="12" cy="13" r="3"/>
+                  </svg>
+                )}
+              </div>
+              <span className="text-xs font-medium text-blue-700">{nahravani === "vlasy" ? "Nahrávám..." : "Vyfotit vlasy"}</span>
+            </button>
+            <button
+              onClick={() => handleFoto("recept", aktivniRezervace.id)}
+              disabled={nahravani !== null}
+              className="bg-amber-50 border border-amber-100 rounded-xl py-3.5 flex flex-col items-center gap-1.5 active:scale-[0.97] transition-transform disabled:opacity-50">
+              <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center">
+                {nahravani === "recept" ? (
+                  <div className="w-4 h-4 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"/>
+                ) : (
+                  <svg width="18" height="18" fill="none" stroke="#92400e" strokeWidth="1.5" viewBox="0 0 24 24">
+                    <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/>
+                  </svg>
+                )}
+              </div>
+              <span className="text-xs font-medium text-amber-700">{nahravani === "recept" ? "Nahrávám..." : "Vyfotit recept"}</span>
+            </button>
+          </div>
+        )}
+        {!aktivniRezervace && (
+          <div className="grid grid-cols-2 gap-2 mb-2 opacity-40">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl py-3.5 flex flex-col items-center gap-1.5">
+              <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+                <svg width="18" height="18" fill="none" stroke="#1d4ed8" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                  <circle cx="12" cy="13" r="3"/>
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-blue-700">Vyfotit vlasy</span>
             </div>
-            <span className="text-xs font-medium text-blue-700">Vyfotit vlasy</span>
-          </button>
-          <button className="bg-amber-50 border border-amber-100 rounded-xl py-3.5 flex flex-col items-center gap-1.5 active:scale-[0.97] transition-transform">
-            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center">
-              <svg width="18" height="18" fill="none" stroke="#92400e" strokeWidth="1.5" viewBox="0 0 24 24">
-                <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/>
-              </svg>
+            <div className="bg-amber-50 border border-amber-100 rounded-xl py-3.5 flex flex-col items-center gap-1.5">
+              <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center">
+                <svg width="18" height="18" fill="none" stroke="#92400e" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/>
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-amber-700">Vyfotit recept</span>
             </div>
-            <span className="text-xs font-medium text-amber-700">Vyfotit recept</span>
-          </button>
-        </div>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => aktivniRezervace && handleZaplatit(aktivniRezervace.id, aktivniRezervace.cena)}

@@ -45,11 +45,12 @@ export default function NastaveniPage() {
 
         {[
           { bg: "bg-emerald-50", color: "#0f6e56", label: "Rezervační odkaz", desc: "Sdílet novým zákaznicím", path: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" },
-          { bg: "bg-amber-50", color: "#92400e", label: "Export PDF", desc: "Tržby pro účetní", path: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8" },
+          { bg: "bg-amber-50", color: "#92400e", label: "Tržby a export PDF", desc: "Přehled a výpis pro účetní", path: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8", href: "/nastaveni/trzby" },
           { bg: "bg-blue-50", color: "#1d4ed8", label: "Platební nastavení", desc: "Zálohy, QR účet", path: "M2 5h20v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5zM2 10h20" },
           { bg: "bg-gray-100", color: "#4b5563", label: "Můj profil", desc: "Jméno, salon, foto", path: "M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" },
         ].map((item, i) => (
-          <button key={i} className="w-full flex items-center gap-3 px-4 py-3.5 border-b border-gray-50 active:bg-gray-50">
+          <button key={i} onClick={() => (item as any).href && router.push((item as any).href)}
+            className="w-full flex items-center gap-3 px-4 py-3.5 border-b border-gray-50 active:bg-gray-50">
             <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center flex-shrink-0`}>
               <svg width="18" height="18" fill="none" stroke={item.color} strokeWidth="1.5" viewBox="0 0 24 24"><path d={item.path} /></svg>
             </div>
