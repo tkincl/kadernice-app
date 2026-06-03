@@ -2,13 +2,13 @@ import type { Metadata, Viewport } from "next"
 import { Geist } from "next/font/google"
 import "./globals.css"
 import BottomNav from "@/components/BottomNav"
-import DataProvider from "@/components/DataProvider"
 
 const geist = Geist({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Kadeřnice",
   description: "Aplikace pro kadeřnice",
+  manifest: "/manifest.json",
 }
 
 export const viewport: Viewport = {
@@ -28,10 +28,8 @@ export default function RootLayout({
     <html lang="cs">
       <body className={`${geist.className} bg-gray-50`}>
         <div className="max-w-md mx-auto min-h-screen bg-white relative">
-          <DataProvider>
-            <main className="pb-20">{children}</main>
-            <BottomNav />
-          </DataProvider>
+          <main className="pb-20">{children}</main>
+          <BottomNav />
         </div>
       </body>
     </html>

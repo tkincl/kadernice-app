@@ -1,10 +1,15 @@
 "use client"
 
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAppStore } from "@/store/useAppStore"
 import { Rezervace } from "@/types"
 
-const DNES = new Date().toISOString().split("T")[0]
+const DNES = "2026-06-03"
+
+function formatCas(cas: string) {
+  return cas
+}
 
 function getStavBarva(stav: Rezervace["stav"]) {
   switch (stav) {
@@ -22,23 +27,24 @@ function getStavDot(stav: Rezervace["stav"]) {
   }
 }
 
-const DNY_CZ = ["Neděle", "Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota"]
-const MESICE_CZ = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"]
-
 export default function PrehledDne() {
   const router = useRouter()
   const { getRezervaceProDen, getKlientka, getDenniTrzba } = useAppStore()
+  const [showNova, setShowNova] = useState(false)
 
   const rezervace = getRezervaceProDen(DNES)
   const trzba = getDenniTrzba(DNES)
   const hotove = rezervace.filter((r) => r.stav === "hotovo").length
   const zbyvaji = rezervace.filter((r) => r.stav !== "hotovo").length
 
-  const dnes = new Date()
-  const datumText = `${DNY_CZ[dnes.getDay()]}, ${dnes.getDate()}. ${MESICE_CZ[dnes.getMonth()]}`
+  const dnes = new Date(DNES)
+  const dnyCZ = ["Neděle", "Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota"]
+  const mesiceCZ = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"]
+  const datumText = `${dnyCZ[dnes.getDay()]}, ${dnes.getDate()}. ${mesiceCZ[dnes.getMonth()]}`
 
   return (
     <div className="flex flex-col h-screen">
+      {/* Header - fixní */}
       <div className="flex-shrink-0 px-4 pt-5 pb-3 border-b border-gray-100">
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -55,6 +61,8 @@ export default function PrehledDne() {
             </svg>
           </button>
         </div>
+
+        {/* Statistiky */}
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-gray-50 rounded-xl p-3">
             <p className="text-xs text-gray-400 mb-1">Dnešní tržba</p>
@@ -74,6 +82,7 @@ export default function PrehledDne() {
         </div>
       </div>
 
+      {/* Seznam - scrollovatelný */}
       <div className="flex-1 overflow-y-auto px-4 py-3">
         <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
           Dnešní plán
@@ -100,7 +109,7 @@ export default function PrehledDne() {
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className={`text-xs font-medium ${aktivni ? "text-emerald-100" : "text-gray-400"}`}>
-                    {r.casOd}
+                    {formatCas(r.casOd)}
                   </p>
                   {r.cena && (
                     <p className={`text-xs ${aktivni ? "text-white" : "text-gray-500"}`}>
@@ -114,6 +123,7 @@ export default function PrehledDne() {
         </div>
       </div>
 
+      {/* FAB - fixní nad navigací */}
       <div className="flex-shrink-0 px-4 py-3 border-t border-gray-100 bg-white">
         <button
           onClick={() => router.push("/kalendar")}
