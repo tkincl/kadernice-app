@@ -119,8 +119,7 @@ function TelefonInput({ value, onChange, autoFocus }: {
                     placeholder="Jana Nováková, 777 123 456&#10;Blanka Tichá, 603 456 789"
                     rows={6}
                     onChange={(e) => {
-                      const radky = e.target.value.split("
-").filter(r => r.trim())
+                      const radky = e.target.value.split("\n").filter((r: string) => r.trim())
                       const kontakty = radky.map(r => {
                         const casti = r.split(",").map(s => s.trim())
                         return {
@@ -379,8 +378,7 @@ export default function KlientkyPage() {
                     placeholder="Jana Nováková, 777 123 456&#10;Blanka Tichá, 603 456 789"
                     rows={6}
                     onChange={(e) => {
-                      const radky = e.target.value.split("
-").filter(r => r.trim())
+                      const radky = e.target.value.split("\n").filter((r: string) => r.trim())
                       const kontakty = radky.map(r => {
                         const casti = r.split(",").map(s => s.trim())
                         return {
