@@ -18,6 +18,37 @@ function getDnyMesice(rok: number, mesic: number) {
   return Array.from({ length: pocet }, (_, i) => new Date(rok, mesic, i + 1))
 }
 
+function casNaMinuty(cas: string): number {
+  const [h, m] = cas.split(":").map(Number)
+  return h * 60 + m
+}
+
+function minutyNaCas(minuty: number): string {
+  const h = Math.floor(minuty / 60)
+  const m = minuty % 60
+  return `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}`
+}
+
+function sePrekvyva(zacatek1: string, delka1: number, zacatek2: string, delka2: number): boolean {
+  const start1 = casNaMinuty(zacatek1)
+  const end1 = start1 + delka1
+  const start2 = casNaMinuty(zacatek2)
+  const end2 = start2 + delka2
+  return start1 < end2 && end1 > start2
+}
+
+function getMaxDelka(casOd: string, rezervace: any[]): number {
+  const startMin = casNaMinuty(casOd)
+  const pracovniKonec = casNaMinuty("18:00")
+  // Najdeme nejblizsi dalsi rezervaci
+  const dalsiStart = rezervace
+    .map(r => casNaMinuty(r.casOd))
+    .filter(s => s > startMin)
+    .sort((a, b) => a - b)[0]
+  const maxMin = dalsiStart ? dalsiStart - startMin : pracovniKonec - startMin
+  return Math.max(30, maxMin)
+}
+
 function getVolneSloty(rezervace: any[]) {
   const pracovniDen = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30",
     "12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00"]
@@ -185,6 +216,7 @@ function KalendarContent() {
   const [novaSluzba, setNovaSluzba] = useState<Sluzba>("Střih")
   const [novaCas, setNovaCas] = useState("09:00")
   const [novaDelka, setNovaDelka] = useState(60)
+  const [maxDelka, setMaxDelka] = useState(600)
 
   // Tyden - zacina od pondeli
   const zacatekTydne = new Date(dnes)
@@ -205,6 +237,15 @@ function KalendarContent() {
 
   const handleUlozit = () => {
     if (!novaKlientkaId) return
+    // Kontrola prekryvu
+    const prekryv = rezervaceDnes.find(r =>
+      sePrekvyva(novaCas, novaDelka, r.casOd, r.delkaMinut)
+    )
+    if (prekryv) {
+      const klientka = getKlientka(prekryv.klientkaId)
+      alert(`Překryv s rezervací ${klientka?.jmeno ?? ""} od ${prekryv.casOd}! Zkraťte délku nebo změňte čas.`)
+      return
+    }
     pridatRezervaci({ klientkaId: novaKlientkaId, datum: vybranyDen, casOd: novaCas, delkaMinut: novaDelka, sluzba: novaSluzba, zaplaceno: false, stav: "ceka" })
     setShowNova(false)
   }
@@ -219,7 +260,15 @@ function KalendarContent() {
   }
 
   const openNova = (cas?: string) => {
-    if (cas) setNovaCas(cas)
+    if (cas) {
+      setNovaCas(cas)
+      // Automaticky nastavime max moznou delku
+      const max = getMaxDelka(cas, rezervaceDnes)
+      setNovaDelka(Math.min(novaDelka, max))
+      setMaxDelka(max)
+    } else {
+      setMaxDelka(getMaxDelka(novaCas, rezervaceDnes))
+    }
     setShowNova(true)
   }
 
@@ -473,7 +522,9 @@ function KalendarContent() {
                   <div className="flex-1 bg-gray-50 border border-gray-100 rounded-xl py-2.5 text-sm font-medium text-gray-900 text-center">
                     {novaDelka >= 60 ? `${Math.floor(novaDelka/60)} hod${novaDelka%60 ? ` ${novaDelka%60} min` : ""}` : `${novaDelka} min`}
                   </div>
-                  <button onClick={() => setNovaDelka(novaDelka + 30)} className="w-10 h-10 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center text-gray-600 text-lg">+</button>
+                  <button onClick={() => setNovaDelka(Math.min(maxDelka, novaDelka + 30))}
+                  disabled={novaDelka >= maxDelka}
+                  className="w-10 h-10 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center text-gray-600 text-lg disabled:opacity-30">+</button>
                 </div>
               </div>
             </div>
@@ -517,7 +568,17 @@ function KalendarContent() {
                 <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1.5">Čas začátku</label>
                 <div className="grid grid-cols-5 gap-1.5">
                   {["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"].map((c) => (
-                    <button key={c} onClick={() => upravitRezervaci(editRezervace.id, { casOd: c })}
+                    <button key={c} onClick={() => {
+                        const prekryv = rezervaceDnes.find(r =>
+                          r.id !== editRezervace.id && sePrekvyva(c, editRezervace.delkaMinut, r.casOd, r.delkaMinut)
+                        )
+                        if (prekryv) {
+                          const k = getKlientka(prekryv.klientkaId)
+                          alert(`Překryv s ${k?.jmeno ?? ""} od ${prekryv.casOd}`)
+                          return
+                        }
+                        upravitRezervaci(editRezervace.id, { casOd: c })
+                      }}
                       className={`py-2 rounded-xl text-xs font-medium border transition-colors ${editRezervace.casOd === c ? "bg-emerald-500 border-emerald-500 text-white" : "border-gray-100 text-gray-600 bg-white"}`}>
                       {c}
                     </button>
