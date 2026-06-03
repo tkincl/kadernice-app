@@ -43,11 +43,11 @@ export default function PrehledDne() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">{datumText}</h1>
-            <p className="text-sm text-gray-400">Dobrý den, Markéto</p>
+            <p className="text-sm text-gray-500">Dobrý den, Markéto</p>
           </div>
           <button
             onClick={() => router.push("/kalendar")}
-            className="w-10 h-10 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center"
+            className="w-10 h-10 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center" aria-label="Otevrit kalendar"
           >
             <svg width="20" height="20" fill="none" stroke="#6b7280" strokeWidth="1.5" viewBox="0 0 24 24">
               <rect x="3" y="4" width="18" height="18" rx="2" />
@@ -57,13 +57,13 @@ export default function PrehledDne() {
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-gray-50 rounded-xl p-3">
-            <p className="text-sm text-gray-400 mb-1">Dnešní tržba</p>
+            <p className="text-sm text-gray-600 mb-1">Dnešní tržba</p>
             <p className="text-2xl font-medium text-gray-900">
               {trzba.toLocaleString("cs-CZ")} Kč
             </p>
           </div>
           <div className="bg-gray-50 rounded-xl p-3">
-            <p className="text-sm text-gray-400 mb-1">Zbývá dnes</p>
+            <p className="text-sm text-gray-600 mb-1">Zbývá dnes</p>
             <p className="text-2xl font-medium text-gray-900">
               {zbyvaji}{" "}
               <span className="text-sm font-normal text-gray-400">
@@ -75,7 +75,7 @@ export default function PrehledDne() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
-        <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+        <p className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">
           Dnešní plán
         </p>
         <div className="flex flex-col gap-2">

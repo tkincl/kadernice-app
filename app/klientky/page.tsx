@@ -222,7 +222,7 @@ export default function KlientkyPage() {
             <p className="text-xs text-gray-400 mb-4">Staci jmeno, ostatni doplnis pozdeji</p>
             <div className="flex flex-col gap-3 mb-4">
               <div>
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1">Jmeno *</label>
+                <label className="text-xs font-medium text-gray-600 uppercase tracking-wide block mb-1">Jmeno *</label>
                 <input
                   autoFocus
                   type="text"
@@ -233,7 +233,7 @@ export default function KlientkyPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1">Telefon</label>
+                <label className="text-xs font-medium text-gray-600 uppercase tracking-wide block mb-1">Telefon</label>
                 <TelefonInput value={noveTelefon} onChange={setNoveTelefon} />
               </div>
             </div>

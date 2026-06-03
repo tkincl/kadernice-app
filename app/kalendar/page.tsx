@@ -344,7 +344,7 @@ function KalendarContent() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3">
-        <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
+        <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-3">
           {vybranyDenObj.toLocaleDateString("cs-CZ", { weekday: "long", day: "numeric", month: "long" })}
         </p>
         {timeline.length === 0 && (
@@ -403,41 +403,55 @@ function KalendarContent() {
 
       {showNova && (
         <div className="fixed inset-0 bg-black/40 z-[60] flex items-end max-w-md mx-auto">
-          <div className="bg-white rounded-t-2xl w-full flex flex-col" style={{maxHeight: "calc(100vh - 64px)"}}>
-            <div className="flex-shrink-0 px-5 pt-5 pb-3">
+          <div className="bg-white rounded-t-2xl w-full flex flex-col" style={{maxHeight: "calc(100dvh - 64px)"}}>
+
+            {/* Hlavicka */}
+            <div className="flex-shrink-0 px-5 pt-5 pb-3 border-b border-gray-100">
               <div className="w-9 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-              <h2 className="text-base font-medium text-gray-900">Nová rezervace</h2>
-              <p className="text-xs text-gray-400 mt-0.5">
-                {vybranyDenObj.toLocaleDateString("cs-CZ", { weekday: "long", day: "numeric", month: "long" })}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-semibold text-gray-900">Nová rezervace</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {new Date(vybranyDen + "T12:00:00").toLocaleDateString("cs-CZ", { weekday: "long", day: "numeric", month: "long" })}
+                    {" · "}{novaCas}
+                    {" → "}<span className="text-emerald-600 font-medium">{minutyNaCas(casNaMinuty(novaCas) + novaDelka)}</span>
+                  </p>
+                </div>
+                <button onClick={() => setShowNova(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg width="14" height="14" fill="none" stroke="#6b7280" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
             </div>
-            <div className="flex-1 overflow-y-auto px-5 pb-2">
-              <div className="mb-3">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Klientka</label>
+
+            {/* Scrollovatelny obsah */}
+            <div className="flex-1 overflow-y-auto px-5 py-3 min-h-0">
+
+              {/* Klientka - nahoře */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Klientka</label>
                   <button onClick={() => setShowNovyKlient(!showNovyKlient)}
-                    className="text-xs text-emerald-600 font-medium flex items-center gap-1">
-                    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    className="text-xs text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-2.5 py-1.5 rounded-lg">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                     Nová klientka
                   </button>
                 </div>
                 {showNovyKlient ? (
                   <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 flex flex-col gap-2">
                     <div>
-                      <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1">Jméno *</label>
+                      <label className="text-xs font-medium text-gray-600 uppercase tracking-wide block mb-1">Jméno *</label>
                       <input autoFocus type="text" placeholder="Jana Nováková" value={novyJmeno}
                         onChange={(e) => setNovyJmeno(e.target.value)}
                         className="w-full bg-white border border-gray-100 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-emerald-300"/>
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1">Telefon</label>
+                      <label className="text-xs font-medium text-gray-600 uppercase tracking-wide block mb-1">Telefon</label>
                       <TelefonInput value={novyTelefon} onChange={setNovyTelefon} />
                     </div>
                     <div className="flex gap-2 pt-1">
                       <button onClick={() => { setShowNovyKlient(false); setNovyJmeno(""); setNovyTelefon("") }}
                         className="flex-1 bg-white border border-gray-100 text-gray-600 rounded-xl py-2.5 text-sm font-medium">Zrušit</button>
-                      <button onClick={handleVytvorKlientku}
-                        disabled={!novyJmeno.trim() || (novyTelefon.length > 0 && validateTelefon(novyTelefon) !== null)}
+                      <button onClick={handleVytvorKlientku} disabled={!novyJmeno.trim()}
                         className="flex-1 bg-emerald-500 text-white rounded-xl py-2.5 text-sm font-medium disabled:opacity-40">Vytvořit</button>
                     </div>
                   </div>
@@ -463,7 +477,7 @@ function KalendarContent() {
                         k.telefon?.includes(hledaniKlientky)
                       )
                       return (
-                        <div className="max-h-36 overflow-y-auto rounded-xl border border-gray-100 bg-white">
+                        <div className="max-h-32 overflow-y-auto rounded-xl border border-gray-100 bg-white">
                           {filtrovane.length === 0 && (
                             <p className="text-xs text-gray-400 text-center py-3">Nenalezena</p>
                           )}
@@ -485,52 +499,102 @@ function KalendarContent() {
                         </div>
                       )
                     })()}
+                    {novaKlientkaId && (
+                      <p className="text-xs text-emerald-600 mt-1 font-medium flex items-center gap-1">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                        {klientky.find(k => k.id === novaKlientkaId)?.jmeno}
+                      </p>
+                    )}
                   </div>
                 )}
-                {novaKlientkaId && !showNovyKlient && (
-                  <p className="text-xs text-emerald-600 mt-1 font-medium">
-                    ✓ {klientky.find(k => k.id === novaKlientkaId)?.jmeno}
-                  </p>
-                )}
               </div>
-              <div className="mb-3">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1.5">Služba</label>
+
+              {/* Sluzba */}
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Služba</label>
                 <div className="flex flex-wrap gap-2">
                   {SLUZBY.map((s) => (
                     <button key={s} onClick={() => setNovaSluzba(s)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${novaSluzba === s ? "bg-emerald-500 border-emerald-500 text-white" : "border-gray-100 text-gray-600 bg-white"}`}>
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${novaSluzba === s ? "bg-emerald-500 border-emerald-500 text-white" : "border-gray-100 text-gray-600 bg-white"}`}>
                       {s}
                     </button>
                   ))}
                 </div>
               </div>
-              <div className="mb-3">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1.5">Čas začátku</label>
+
+              {/* Cas */}
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Čas začátku</label>
                 <div className="grid grid-cols-5 gap-1.5">
-                  {["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"].map((c) => (
-                    <button key={c} onClick={() => setNovaCas(c)}
-                      className={`py-2 rounded-xl text-xs font-medium border transition-colors ${novaCas === c ? "bg-emerald-500 border-emerald-500 text-white" : "border-gray-100 text-gray-600 bg-white"}`}>
-                      {c}
-                    </button>
-                  ))}
+                  {["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"].map((c) => {
+                    const jeZablokovan = rezervaceDnes.some(r => sePrekvyva(c, 30, r.casOd, r.delkaMinut))
+                    return (
+                      <button key={c} onClick={() => {
+                        if (jeZablokovan) return
+                        setNovaCas(c)
+                        const max = getMaxDelka(c, rezervaceDnes)
+                        setMaxDelka(max)
+                        setNovaDelka(Math.min(novaDelka, max))
+                      }}
+                        disabled={jeZablokovan}
+                        className={`py-2 rounded-xl text-sm font-medium border transition-colors ${
+                          novaCas === c ? "bg-emerald-500 border-emerald-500 text-white"
+                          : jeZablokovan ? "border-gray-100 text-gray-200 bg-gray-50 line-through"
+                          : "border-gray-100 text-gray-600 bg-white"
+                        }`}>
+                        {c}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
+
+              {/* Delka s vizualnim indikatorem */}
               <div className="mb-2">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1.5">Délka</label>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => setNovaDelka(Math.max(30, novaDelka - 30))} className="w-10 h-10 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center text-gray-600 text-lg">−</button>
-                  <div className="flex-1 bg-gray-50 border border-gray-100 rounded-xl py-2.5 text-sm font-medium text-gray-900 text-center">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Délka návštěvy</label>
+                  <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${maxDelka < 600 ? "bg-orange-50 text-orange-500" : "bg-gray-50 text-gray-400"}`}>
+                    max {maxDelka >= 60 ? `${Math.floor(maxDelka/60)} hod${maxDelka%60 ? ` ${maxDelka%60} min` : ""}` : `${maxDelka} min`}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 mb-2">
+                  <button onClick={() => setNovaDelka(Math.max(30, novaDelka - 30))}
+                    className="w-12 h-12 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center text-gray-600 text-2xl font-light active:bg-gray-100">−</button>
+                  <div className="flex-1 bg-gray-50 border border-gray-100 rounded-xl py-3 text-lg font-bold text-gray-900 text-center">
                     {novaDelka >= 60 ? `${Math.floor(novaDelka/60)} hod${novaDelka%60 ? ` ${novaDelka%60} min` : ""}` : `${novaDelka} min`}
                   </div>
                   <button onClick={() => setNovaDelka(Math.min(maxDelka, novaDelka + 30))}
-                  disabled={novaDelka >= maxDelka}
-                  className="w-10 h-10 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center text-gray-600 text-lg disabled:opacity-30">+</button>
+                    disabled={novaDelka >= maxDelka}
+                    className="w-12 h-12 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center text-gray-600 text-2xl font-light disabled:opacity-30 active:bg-gray-100">+</button>
+                </div>
+                {/* Progress bar */}
+                <div className="flex gap-1 mb-1">
+                  {Array.from({length: Math.min(Math.floor(maxDelka/30), 12)}, (_, i) => (
+                    <div key={i} className={`h-2 flex-1 rounded-full transition-colors ${
+                      i < Math.floor(novaDelka/30) ? "bg-emerald-400" : "bg-gray-100"
+                    }`} />
+                  ))}
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xs text-gray-400">{novaCas}</span>
+                  <span className="text-xs font-semibold text-emerald-600">
+                    konec {minutyNaCas(casNaMinuty(novaCas) + novaDelka)}
+                  </span>
+                  {maxDelka < 600 && (
+                    <span className="text-xs text-orange-400">
+                      další od {minutyNaCas(casNaMinuty(novaCas) + maxDelka)}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* Tlacitka - fixne dole */}
             <div className="flex-shrink-0 px-5 py-4 border-t border-gray-100 flex gap-2">
-              <button onClick={() => setShowNova(false)} className="flex-1 bg-gray-50 border border-gray-100 text-gray-600 rounded-xl py-3 text-sm font-medium">Zrušit</button>
-              <button onClick={handleUlozit} disabled={!novaKlientkaId} className="flex-1 bg-emerald-500 text-white rounded-xl py-3 text-sm font-medium disabled:opacity-40">Uložit</button>
+              <button onClick={() => setShowNova(false)}
+                className="flex-1 bg-gray-50 border border-gray-100 text-gray-600 rounded-xl py-3 text-sm font-medium">Zrušit</button>
+              <button onClick={handleUlozit} disabled={!novaKlientkaId}
+                className="flex-1 bg-emerald-500 text-white rounded-xl py-3 text-sm font-semibold disabled:opacity-40">Uložit</button>
             </div>
           </div>
         </div>
@@ -554,7 +618,7 @@ function KalendarContent() {
             </div>
             <div className="flex-1 overflow-y-auto px-5 pb-2">
               <div className="mb-3">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1.5">Služba</label>
+                <label className="text-xs font-medium text-gray-600 uppercase tracking-wide block mb-1.5">Služba</label>
                 <div className="flex flex-wrap gap-2">
                   {SLUZBY.map((s) => (
                     <button key={s} onClick={() => upravitRezervaci(editRezervace.id, { sluzba: s })}
@@ -565,7 +629,7 @@ function KalendarContent() {
                 </div>
               </div>
               <div className="mb-3">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1.5">Čas začátku</label>
+                <label className="text-xs font-medium text-gray-600 uppercase tracking-wide block mb-1.5">Čas začátku</label>
                 <div className="grid grid-cols-5 gap-1.5">
                   {["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"].map((c) => (
                     <button key={c} onClick={() => {
@@ -586,7 +650,7 @@ function KalendarContent() {
                 </div>
               </div>
               <div className="mb-3">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide block mb-1.5">Délka</label>
+                <label className="text-xs font-medium text-gray-600 uppercase tracking-wide block mb-1.5">Délka</label>
                 <div className="flex items-center gap-3">
                   <button onClick={() => upravitRezervaci(editRezervace.id, { delkaMinut: Math.max(30, editRezervace.delkaMinut - 30) })}
                     className="w-10 h-10 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center text-gray-600 text-lg">−</button>
