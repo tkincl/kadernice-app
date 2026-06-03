@@ -59,7 +59,7 @@ export default function TrzbyPage() {
   }
 
   return (
-    <div className="flex flex-col" style={{height: "calc(100vh - 80px)"}}>
+    <div className="flex flex-col" style={{height: "calc(100dvh - 80px)"}}>
       <div className="flex-shrink-0 px-4 pt-5 pb-3 border-b border-gray-100">
         <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-gray-400 mb-3">
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
@@ -100,7 +100,7 @@ export default function TrzbyPage() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
         {/* Souhrn */}
         <div className="grid grid-cols-2 gap-2 mb-4">
           <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
